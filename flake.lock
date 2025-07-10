@@ -248,16 +248,16 @@
     },
     "nixpkgs_4": {
       "locked": {
-        "lastModified": 1751741127,
-        "narHash": "sha256-t75Shs76NgxjZSgvvZZ9qOmz5zuBE8buUaYD28BMTxg=",
+        "lastModified": 1751792365,
+        "narHash": "sha256-J1kI6oAj25IG4EdVlg2hQz8NZTBNYvIS0l4wpr9KcUo=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "29e290002bfff26af1db6f64d070698019460302",
+        "rev": "1fd8bada0b6117e6c7eb54aad5813023eed37ccb",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-25.05",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -265,17 +265,19 @@
     "nn-tilde": {
       "flake": false,
       "locked": {
-        "lastModified": 1747905550,
-        "narHash": "sha256-Q1eYKwpAGaL3za1wMup68vX+nLy67hWejxPo4hqvNZU=",
-        "owner": "acids-ircam",
-        "repo": "nn_tilde",
-        "rev": "d816a2eada311219d83cb7e43215e534b521a250",
-        "type": "github"
+        "lastModified": 1751979962,
+        "narHash": "sha256-1WbXH7KuW7MGfKppE1lMbuY3Xlf/Jae+k6SQ4dtScPo=",
+        "ref": "refs/heads/master",
+        "rev": "ca97f8259442649fe7b5acacd8d9cdd8757098dd",
+        "revCount": 340,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/acids-ircam/nn_tilde"
       },
       "original": {
-        "owner": "acids-ircam",
-        "repo": "nn_tilde",
-        "type": "github"
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/acids-ircam/nn_tilde"
       }
     },
     "pre-commit-hooks": {
@@ -297,6 +299,22 @@
       "original": {
         "owner": "cachix",
         "repo": "pre-commit-hooks.nix",
+        "type": "github"
+      }
+    },
+    "pure-data": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1751950622,
+        "narHash": "sha256-AqsxRcw7aakxgtuxn3nci0jmOBe9evSOAse3d3wU8mo=",
+        "owner": "pure-data",
+        "repo": "pure-data",
+        "rev": "3bba51379894f3b07987724d0286d210338677a9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pure-data",
+        "repo": "pure-data",
         "type": "github"
       }
     },
@@ -352,6 +370,7 @@
         "my-lib": "my-lib",
         "nixpkgs": "nixpkgs_4",
         "nn-tilde": "nn-tilde",
+        "pure-data": "pure-data",
         "pyproject-build-systems": "pyproject-build-systems",
         "pyproject-nix": "pyproject-nix",
         "uv2nix": "uv2nix"
