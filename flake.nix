@@ -268,113 +268,50 @@
 
         uv2nix-shell = pkgs.mkShell uv2nix-shell-args;
 
-        rave-pd = let 
-          # arch = "${pkgs.stdenv.hostPlatform.platform.arch}"; # x86_64
-          aaa = 1;
-          in pkgs.runCommand "rave-pd" {
+        # build nn-tilde (pd package) from source, builds into a binary.
+        # `libcurl.so` put into env to mimic what cmake build expects in curl being installed in conda environment.
+        nn-tilde = pkgs.runCommand "rave-pd" {
             nativeBuildInputs = [
-              # silly-shell.inputDerivation
-              # uv2nix-shell-args.packages
-              pkgs.tree
-              # .inputDerivation
-              # uv2nix-shell
-              # .inputDerivation
               pkgs.llvmPackages_20.libcxxClang
               pkgs.python313Packages.cmake
               pkgs.libtorch-bin
               pkgs.puredata
-              # pkgs.curlFull
-              # pkgs.curlFull.dev
-              # pkgs.curlFull.out
-              # .dev
-              # pkgs.curlpp
-              pkgs.autoPatchelfHook
-              # pkgs.curlFull.dev
               pkgs.curlFull.dev
               pkgs.curlFull.out
-              # pkgs.curlFull.debug
-              # pkgs.openssl.dev
-              # pkgs.openssl.out
-              # pkgs.curl
             ];
-            # env = uv2nix-shell-args.env;
           } 
           
           ''
-            
-            # exit 1
-            # locate libcurl.so
-
-            echo ${builtins.head uv2nix-shell-args.packages}
-            ls ${builtins.head uv2nix-shell-args.packages}
-            # exit 1 
             cp -r ${nn-tilde} src
             chmod -R u+w src
             cd src
-            # mkdir -p build/puredata_include
             mkdir -p build/pd_include
             chmod -R u+w build
             mkdir src/pd_include
 
-            # mkdir -p puredata_include
-            # cp ${pure-data}/src/m_pd.h build/puredata_include/
-            # cp -r ${pkgs.puredata}/include/m_pd.h build/puredata_include/
             cp -r ${pkgs.puredata}/include/m_pd.h build/pd_include/
             cp -r ${pkgs.puredata}/include/m_pd.h src/pd_include/
 
             mkdir env
             cp -r ${pkgs.curlFull.out}/lib env/
-            tree env
-
-            # mkdir build
             cd build
-            # cmake ../src -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_PREFIX_PATH=../env/lib/python3.12/site-packages/torch -DCMAKE_BUILD_TYPE=Release -DPUREDATA_INCLUDE_DIR=../puredata_include -DCMAKE_OSX_ARCHITECTURES=arch
-            # tree ..
+
             chmod -R u+rw ..
-            # ls puredata_include
-            # exit 1
-            # tree ..
-            # ${pkgs.which}/bin/which cmake
-            # exit 1
             cmake ../src -DCMAKE_BUILD_TYPE=Release -DPUREDATA_INCLUDE_DIR=$(pwd)/pd_include
-            
-            tree .
-
-            # cp -r . $out/
-
-            # cp -r ${pkgs.puredata}/include/m_pd.h build/pd_include/
-            # ls build
-            # exit 1
-            # ls build/pd_include
-            # ../build/puredata_include
-
             cmake --build . --config Release
             
-            cp -r . $out/
-
-            # tree ..
-            # exit 1
+            cp -r ./frontend/puredata $out/
           '';
 
-                  # echo $(which python)
-          # echo $(python -c "import torch")
-          # mkdir -p $out
-
         in {
-          # Package a virtual environment as our main application.
-          #
-          # Enable no optional dependencies for production build.
           packages = {
-            default = pythonSet.mkVirtualEnv "hello-world-env" workspace.deps.default;
-            inherit rave-pd;
+            inherit nn-tilde;
           };
 
           # This example provides two different modes of development:
           # - Impurely using uv to manage virtual environments
           # - Pure development using uv2nix to manage virtual environments
           devShells = {
-            # It is of course perfectly OK to keep using an impure virtualenv workflow and only use uv2nix to build packages.
-            # This devShell simply adds Python and undoes the dependency leakage done by Nixpkgs Python infrastructure.
             inherit impure;
             
             uv2nix = uv2nix-shell;
