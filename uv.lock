@@ -126,7 +126,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "cached-conv", specifier = ">=2.5.0" },
-    { name = "torch", specifier = "==2.5" },
+    { name = "torch", specifier = "==2.5.0" },
 ]
 
 [[package]]
