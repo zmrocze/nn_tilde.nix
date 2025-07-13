@@ -72,38 +72,52 @@
 
         # build nn-tilde (pd package) from source, builds into a binary.
         # `libcurl.so` put into env to mimic what cmake build expects in curl being installed in conda environment.
-        nn-tilde-pd = pkgs.runCommand "rave-pd" {
-            nativeBuildInputs = [
-              pkgs.llvmPackages_20.libcxxClang
-              pkgs.python313Packages.cmake
-              pkgs.libtorch-bin
-              pkgs.puredata
-              pkgs.curlFull.dev
-              pkgs.curlFull.out
-            ];
-          } 
-          
-          ''
-            cp -r ${nn-tilde} src
-            chmod -R u+w src
-            cd src
-            mkdir -p build/pd_include
-            chmod -R u+w build
-            mkdir src/pd_include
+        nn-tilde-pd = let
+          libPath = lib.makeLibraryPath [
+            pkgs.curlFull.out
+          ];
+          in pkgs.runCommand "rave-pd" {
+              nativeBuildInputs = [
+                pkgs.python313Packages.cmake
+                pkgs.autoPatchelfHook
+                pkgs.curlFull.dev
+              ];
+              # runtimeinputs = [
+              #   pkgs.curlFull.out
+              # ];
+              buildInputs = [
+                pkgs.llvmPackages_20.libcxxClang
+                pkgs.libtorch-bin
+                pkgs.puredata
+                pkgs.curlFull.out
+              ];
+            }
+            ''
+              cp -r ${nn-tilde} src
+              chmod -R u+w src
+              cd src
+              mkdir -p build/pd_include
+              chmod -R u+w build
+              mkdir src/pd_include
 
-            cp -r ${pkgs.puredata}/include/m_pd.h build/pd_include/
-            cp -r ${pkgs.puredata}/include/m_pd.h src/pd_include/
+              cp -r ${pkgs.puredata}/include/m_pd.h build/pd_include/
+              cp -r ${pkgs.puredata}/include/m_pd.h src/pd_include/
 
-            mkdir env
-            cp -r ${pkgs.curlFull.out}/lib env/
-            cd build
+              mkdir env
+              cp -r ${pkgs.curlFull.out}/lib env/
+              cd build
 
-            chmod -R u+rw ..
-            cmake ../src -DCMAKE_BUILD_TYPE=Release -DPUREDATA_INCLUDE_DIR=$(pwd)/pd_include
-            cmake --build . --config Release
-            
-            cp -r ./frontend/puredata $out/
-          '';
+              chmod -R u+rw ..
+              cmake ../src -DCMAKE_BUILD_TYPE=Release -DPUREDATA_INCLUDE_DIR=$(pwd)/pd_include
+              cmake --build . --config Release
+              
+              cp -r ./frontend/puredata $out/
+
+              ls $out/nn_tilde
+              patchelf --print-rpath $out/nn_tilde/nn~.pd_linux
+              patchelf --add-rpath ${libPath} $out/nn_tilde/nn~.pd_linux
+              patchelf --print-rpath $out/nn_tilde/nn~.pd_linux
+            '';
 
         in {
           packages = {
