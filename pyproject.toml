@@ -5,7 +5,7 @@ version = "2025.0.0"
 dependencies = [
   # "torch==2.5",
   "cached_conv>=2.5.0",
-  "torch==2.5.0",
+  "torch==2.5",
   # "numpy",
   # "torchaudio", 
   # "torchvision==2.5.1"
