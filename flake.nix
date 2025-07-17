@@ -246,39 +246,40 @@
         # > nix develop .#impure
         # $ uv lock
 
+        # llvm vs libc problem:
+        # pkgs.llvmPackages_20.libcxxClang is llvm
+        # libtorch-bin is libc
+
         # build nn-tilde (pd package) from source, builds into a binary.
         # `libcurl.so` put into env to mimic what cmake build expects in curl being installed in conda environment.
         nn-tilde-pd = let
           libPath = lib.makeLibraryPath [
             pkgs.curlFull.out
-            virtualenv
+            # virtualenv
           ];
           in pkgs.runCommand "rave-pd" {
               nativeBuildInputs = [
                 pkgs.python313Packages.cmake
                 pkgs.autoPatchelfHook
-                pkgs.curlFull.dev
-                virtualenv
               ];
               # runtimeinputs = [
               #   pkgs.curlFull.out
               # ];
               buildInputs = [
-                pkgs.llvmPackages_20.libcxxClang
+                # pkgs.llvmPackages_20.libcxxClang
+                pkgs.llvmPackages_20.libstdcxxClang
                 # python313Packages.torch
                 # python313Packages.torchaudio
                 # python313Packages.torchvision
-
-                # pkgs.libtorch-bin
-                pkgs.puredata
-                pkgs.curlFull.out
+                pkgs.curlFull.dev
                 virtualenv
-              ];
+                pkgs.libtorch-bin.out
+                pkgs.libtorch-bin.dev
+                # pkgs.puredata
+              ] ++ cudaLibs;
             }
             ''
               cp -r ${nn-tilde} src
-              tree src
-              exit 1
 
               chmod -R u+w src
               cd src
@@ -293,10 +294,20 @@
               cp -r ${pkgs.curlFull.out}/lib env/
               cd build
 
+              # fix doesn't work, so verify if the nixos clang++ wrapper honors this option
+              # ok. changed to other pkgs.llvmPackages_20.libstdcxxClang. now build error. start here
+
               chmod -R u+rw ..
-              cmake ../src -DCMAKE_PREFIX_PATH=${virtualenv}/lib/python3.12/site-packages/torch -DCMAKE_BUILD_TYPE=Release -DPUREDATA_INCLUDE_DIR=$(pwd)/pd_include
+              # -DCMAKE_PREFIX_PATH=${virtualenv}/lib/python3.12/site-packages/torch
+              export CC=${pkgs.llvmPackages_20.libcxxClang}/bin/clang
+              export CXX="${pkgs.llvmPackages_20.libcxxClang}/bin/clang++"
+              # export CXX="clang++ -stdlib=libstdc++"
+              #  -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX 
+              # export CMAKE_CXX_FLAGS="-stdlib=libstdc++"
+              # -DCMAKE_CXX_FLAGS="-stdlib=libstdc++"
+              cmake ../src -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER="$CXX" -DCMAKE_BUILD_TYPE=Release -DPUREDATA_INCLUDE_DIR=$(pwd)/pd_include
               cmake --build . --config Release
-              
+
               cp -r ./frontend/puredata $out/
 
               # ls $out/nn_tilde
